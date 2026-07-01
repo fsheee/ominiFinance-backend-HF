@@ -30,18 +30,14 @@ def seed_knowledge_base(knowledge_base: Dict[str, Dict[str, str]]):
         settings=Settings(anonymized_telemetry=False)
     )
 
-    try:
-        _collection = _client.get_collection("financial_knowledge")
-        if _collection.count() > 0:
-            _seeded = True
-            return
-    except ValueError:
-        pass
-
-    _collection = _client.create_collection(
+    _collection = _client.get_or_create_collection(
         name="financial_knowledge",
         metadata={"hnsw:space": "cosine"}
     )
+
+    if _collection.count() > 0:
+        _seeded = True
+        return
 
     ids = []
     documents = []
@@ -65,7 +61,6 @@ def seed_knowledge_base(knowledge_base: Dict[str, Dict[str, str]]):
     )
 
     _seeded = True
-
 
 def search_knowledge(query: str, n_results: int = 5) -> List[Dict[str, Any]]:
     if _collection is None:
