@@ -27,3 +27,5 @@ FastAPI backend for the OmniFinance autonomous banking sandbox.
 - `POST /transactions/approve` - HITL approval
 - `POST /tools/execute` - MCP tool execution
 - `POST /reset` - Reset sandbox
+
+
