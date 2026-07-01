@@ -11,6 +11,42 @@ pinned: false
 
 FastAPI backend for the OmniFinance autonomous banking sandbox.
 
+## Authentication
+
+Protected endpoints require an API key in the request header:
+
+```
+X-API-Key: your-api-key
+```
+
+**Protected endpoints** (require `X-API-Key` header):
+- `POST /chat`
+- `POST /tools/execute`
+- `POST /transactions/approve`
+- `POST /reset`
+
+**Public endpoints** (no auth required):
+- `GET /`
+- `GET /health`
+- `GET /wallet`
+- `GET /transactions`
+- `GET /skills`
+- `GET /api/telemetry`
+- `GET /docs`
+
+Example curl request:
+
+```bash
+curl -X POST https://Afsheekhi-omnifinance-api.hf.space/chat \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{"prompt": "Spent $45 on pizza", "session_id": "test"}'
+```
+
+## Skills
+
+See [skills.md](skills.md) for the full agent skills registry.
+
 ## Environment Variables
 
 | Variable | Description |
