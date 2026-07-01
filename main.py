@@ -18,12 +18,7 @@ app = FastAPI(
     version="1.0.0"
 )
 
-@app.get("/")
-async def root():
-    return {
-        "status": "healthy",
-        "service": "OmniFinance API"
-    }
+
 # Enable CORS for local Next.js development server running on port 3000
 app.add_middleware(
     CORSMiddleware,
@@ -32,7 +27,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
+@app.get("/")
+async def root():
+    return {
+        "status": "healthy",
+        "service": "OmniFinance API"
+    }
 # Initialize database schema on startup
 @app.on_event("startup")
 def startup_event():
