@@ -18,6 +18,12 @@ app = FastAPI(
     version="1.0.0"
 )
 
+@app.get("/")
+async def root():
+    return {
+        "status": "healthy",
+        "service": "OmniFinance API"
+    }
 # Enable CORS for local Next.js development server running on port 3000
 app.add_middleware(
     CORSMiddleware,
