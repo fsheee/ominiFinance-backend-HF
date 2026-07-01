@@ -1,5 +1,6 @@
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Depends, Security
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import APIKeyHeader
 from pydantic import BaseModel, Field
 from typing import Optional, Dict, Any, List
 import os
@@ -10,6 +11,14 @@ from dotenv import load_dotenv
 
 load_dotenv()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+API_KEY = os.getenv("SANDBOX_API_KEY", "omnifinance-dev-key")
+api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
+
+
+async def verify_api_key(key: str = Security(api_key_header)):
+    if key != API_KEY:
+        raise HTTPException(status_code=403, detail="Invalid API Key")
+    return key
 
 
 app = FastAPI(
@@ -79,7 +88,7 @@ def get_sandbox_telemetry():
         }
     }
 
-@app.post("/chat")
+@app.post("/chat", dependencies=[Depends(verify_api_key)])
 def chat_orchestrator(request: ChatRequest):
     """
     Main orchestrator endpoint. Parses intent, delegates execution to sub-agents, 
@@ -104,7 +113,7 @@ def get_transaction_history(limit: int = 50):
     """Exposes transaction logs in the sandbox ledger."""
     return db.get_transactions("account_123", limit=limit)
 
-@app.post("/transactions/approve")
+@app.post("/transactions/approve", dependencies=[Depends(verify_api_key)])
 def approve_transaction(request: HITLApprovalRequest):
     """
     Resolves the Human-in-the-Loop (HITL) pause state.
@@ -123,7 +132,7 @@ def approve_transaction(request: HITLApprovalRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"System error resolving approval: {str(e)}")
 
-@app.post("/tools/execute")
+@app.post("/tools/execute", dependencies=[Depends(verify_api_key)])
 def execute_mcp_tool(request: ToolExecutionRequest):
     """
     Mock Model Context Protocol (MCP) execution bridge. Exposes the domain tools
@@ -181,7 +190,7 @@ def execute_mcp_tool(request: ToolExecutionRequest):
             detail=f"Tool '{tool}' not found. Available: log_transaction, evaluate_fraud_risk, fetch_financial_knowledge_base"
         )
 
-@app.post("/reset")
+@app.post("/reset", dependencies=[Depends(verify_api_key)])
 def reset_sandbox():
     """Resets the digital wallet balance to $5000.00 and clears all transactions."""
     try:
@@ -190,4 +199,8 @@ def reset_sandbox():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database reset failure: {str(e)}")
 
-#
+@app.get("/skills")
+def get_skills():
+    """Returns the full skills registry of all available agents and their methods."""
+    from agents.skills import SKILLS_REGISTRY
+    return {"skills": SKILLS_REGISTRY}
