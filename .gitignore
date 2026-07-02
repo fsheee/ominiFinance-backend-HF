@@ -38,3 +38,5 @@ frontend/.turbo/
 
 # Logs
 *.log
+
+backend/.env
