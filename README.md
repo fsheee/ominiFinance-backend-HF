@@ -34,6 +34,8 @@ X-API-Key: your-api-key
 - `GET /api/telemetry`
 - `GET /docs`
 
+Docs are deployed on Hugging Face: https://afsheenkhi-omnifinance-api.hf.space/docs
+
 Example curl request:
 
 ```bash
